@@ -3,6 +3,14 @@
 uniform float u_Time;
 
 in vec3 a_Position;
+in float a_Mass;
+in vec2 a_Vel;
+in vec2 a_Offset;
+in float a_RV; 
+in float a_RV1;
+
+const float c_PI = 3.1415926535897932384626433832795;
+const vec2 c_G= vec2(0.0, -9.8);
 
 void Basic()
 {
@@ -27,7 +35,7 @@ void sin2()
 	float t = mod(u_Time *10 ,1.0);
 	vec4 newPosition;
 	newPosition.x = a_Position.x  - 1.0 + t * 2;
-    newPosition.y = a_Position.y +  0.5*sin(t*3.14*2)*0.5;
+    newPosition.y = a_Position.y +  0.5*sin(t*3.14*2)*0.5;      //시험은 이런 곳에 빈 칸이나 함수 전체 쓰기 이런 거 나옴
     newPosition.z = a_Position.z;
     newPosition.w = 1.0;
 
@@ -54,43 +62,51 @@ void circle1()
 	newPosition.w = 1.0;
 	gl_Position = newPosition;
 }
-void sin4()
+float pseudoRandom (float n) 
 {
-    // 1. 별 모양(스피로그래프) 궤적 계산
-    // 도형이 별 모양을 빠르게 그리도록 그리는 시간(drawTime)은 빠르게 설정합니다.
-    float drawTime = u_Time * 5.0; 
-    float cx = cos(drawTime) + 0.5 * cos(drawTime * 1.5);
-    float cy = sin(drawTime) - 0.5 * sin(drawTime * 1.5);
+    return fract(sin(n) * 43758.5453);
+}
+void Falling()
+{
+    float newTime = u_Time - pseudoRandom(a_RV1);
 
-    // 기본 별 모양의 좌표
-    float px = (cx / 1.5) * 0.9;
-    float py = (cy / 1.5) * 0.9;
-    
-    // 2. 그려지는 전체 궤적(별 모양) 자체를 회전시킬 각도
-    // 전체 모양은 천천히 돌도록 회전 시간(rotateTime)은 느리게 설정합니다.
-    float rotateTime = u_Time * 0.5; 
-    float cosTheta = cos(rotateTime);
-    float sinTheta = sin(rotateTime);
-    
-    // 3. 회전 행렬을 '도형'이 아닌 '궤적 좌표(px, py)'에 적용
-    float rotatedPx = px * cosTheta - py * sinTheta;
-    float rotatedPy = px * sinTheta + py * cosTheta;
-    
-    // 4. 도형 크기 축소 (크기 0.1배)
-    float localX = a_Position.x * 0.1;
-    float localY = a_Position.y * 0.1;
+    vec4 newPos;
 
-    // 5. 최종 위치 계산: 회전하는 별 모양 궤적 위에 축소된 도형을 올려놓음
-    vec4 newPosition;
-    newPosition.x = localX + rotatedPx;
-    newPosition.y = localY + rotatedPy;
-    newPosition.z = a_Position.z;
-    newPosition.w = 1.0;
+    if(newTime > 0.0)
+    {
+        // 반복 생성
+        float t = mod(newTime, 3.0);
+        float tt = t * t;
 
-    gl_Position = newPosition;
+        // 꼬리 밀도 (위쪽 빽빽)
+        float tail = pow(a_RV, 2.0) * 0.8;
+
+        // 상단 고정 위치
+        float rootY = 0.9;
+
+        // 꼬리 곡선
+        float curve = sin(tail * 3.0) * 0.15;
+
+        // 전체 꼬리 살랑 (계속 흔들림)
+        float sway = sin(u_Time * 1.5 + tail * 4.0) * 0.08;
+
+        // 끝쪽 더 많이 흔들림
+        float tip = sin(u_Time * 2.0 + a_RV * 6.28) * 0.05 * a_RV;
+
+        newPos.x = a_Position.x + curve + sway + tip;
+        newPos.y = rootY - tail + 0.5 * c_G.y * tt * 0.15;
+        newPos.z = a_Position.z;
+        newPos.w = 1.0;
+    }
+    else
+    {
+        newPos = vec4(-1000,-1000,0,1);
+    }
+
+    gl_Position = newPos;
 }
 
 void main()
 {
-	sin4();
+	Falling();
 }

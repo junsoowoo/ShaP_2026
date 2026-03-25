@@ -24,9 +24,11 @@ private:
 	GLuint CompileShaders(char* filenameVS, char* filenameFS);
 	void CreateVertexBufferObjects();
 	void GetGLPosition(float x, float y, float *newX, float *newY);
+	void GenParticles(int count);
 
 	bool m_Initialized = false;
-	
+	int m_ParticleCount;
+
 	unsigned int m_WindowSizeX = 0;
 	unsigned int m_WindowSizeY = 0;
 
