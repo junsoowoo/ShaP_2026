@@ -29,10 +29,24 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 	//Create VBOs
 	CreateVertexBufferObjects();
 
+	int index = 0;
+	for(int i =0; i < 500; i++)
+	{
+		float x = (float)rand() / RAND_MAX ;
+		float y = (float)rand() / RAND_MAX;
+		float sTime = (float)rand() / RAND_MAX * 5.0f;
+		float lTime = (float)rand() / RAND_MAX * 0.5f;
+
+		m_RainInfo[index++] = x;
+		m_RainInfo[index++] = y;
+		m_RainInfo[index++] = sTime;
+		m_RainInfo[index++] = lTime;
+	}
 	if (m_SolidRectShader > 0 && m_VBORect > 0 && m_FSShader)
 	{
 		m_Initialized = true;
 	}
+
 }
 
 bool Renderer::IsInitialized()
@@ -253,6 +267,8 @@ void Renderer::DrawFS()
 
 	int uTime = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTime, gTime);
+	int uPoints = glGetUniformLocation(shader, "u_Points");
+	glUniform4fv(uPoints, 500, m_RainInfo);
 
 	int attribPosition = glGetAttribLocation(shader, "a_Pos");
 	int attribTex = glGetAttribLocation(shader, "a_Tex");

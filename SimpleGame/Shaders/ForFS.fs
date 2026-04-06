@@ -2,8 +2,15 @@
 
 in vec2 v_Tex;
 uniform float u_Time;
+uniform vec4 u_Points[500];
 
 layout(location=0) out vec4 FragColor;
+
+const float c_PI= 3.1415926;
+const vec4 c_Points[2] = vec4[2](
+    vec4(0.5, 0.5, 0.0, 0.5), 
+    vec4(0.7, 0.7, 0.5, 1.0)
+);
 
 void Simple()
 {
@@ -12,7 +19,6 @@ void Simple()
    else 
    FragColor = vec4(1);
 }
-const float c_PI= 3.1415926;
 void Line()
 {
 	float trans = c_PI*0.5;									//패턴 이동
@@ -50,12 +56,40 @@ void Circles()
 	
 	float dist = distance(center, currPos);
 	
-	float grey=pow(abs(sin(dist * 4* c_PI*count + u_Time*5)),32);
+	float grey=pow(abs(sin(dist * 4* c_PI*count + u_Time*10)),4);
 
 	FragColor = vec4(grey);
 }
+
+void RainDrop()
+{
+	float accum=0;
+	for(int i=0;i<500;i++)
+	{
+		float sTime=u_Points[i].z;
+		float lTime=u_Points[i].w;
+		float newTime=u_Time-sTime;
+		if(newTime>0)
+		{
+			float t=fract(newTime/lTime);												//0~1						
+			float oneMinus=1-t;															//1~0
+			t=t*lTime;																	//0~1
+
+			vec2 center =u_Points[i].xy;
+			vec2 currPos = v_Tex;
+			float count = 5;
+			float range = t/5;
+
+			float dist = distance(center, currPos);
+			float fade = clamp(range - dist, 0, 1)*(1/range);							//중심에서 멀어질수록 사라지는 효과
+			float grey=pow(
+				abs(sin(dist * 4* c_PI*count - t*10)),4);
+			accum+=grey*fade*oneMinus;
+		}
+	}
+	FragColor = vec4(accum);
+}
 void main()
 {
-   Circles();
-   
+   RainDrop();
 }
