@@ -89,7 +89,51 @@ void RainDrop()
 	}
 	FragColor = vec4(accum);
 }
+void Flag()
+{
+	float amp = 0.5;
+	float speed =10;
+	float sinInput=v_Tex.x * c_PI * 2  - u_Time*speed;
+    float sinValue = v_Tex.x*amp *(((sin(sinInput) +1)/2)-0.5)+0.5;		//v_Tex.x * 는 왼쪽 고정
+	
+	float fWidth=0.5;													//끝을 뽀족하게 말고
+	float width=0.5 *mix(1,fWidth,v_Tex.x);								//1-v_Tex.x 는 점점 뽀족하게
+    float grey=0;
+
+   if(v_Tex.y < sinValue + width/2 && v_Tex.y > sinValue -width/2)
+   {
+	   grey=1;
+   }
+   else
+   {
+	   grey =0;
+   }
+   FragColor = vec4(grey);
+}
+
+void Flame()
+{
+	float amp = 0.5;
+	float speed =10;
+	float newY= 1-v_Tex.y;
+	float sinInput=newY * c_PI * 2  - u_Time*speed;
+    float sinValue = newY*amp *(((sin(sinInput) +1)/2)-0.5)+0.5;		//v_Tex.x * 는 왼쪽 고정
+	
+	float fWidth=0.;													//끝을 뽀족하게 말고
+	float width=0.5 *mix(fWidth,1,newY);								//1-v_Tex.x 는 점점 뽀족하게
+    float grey=0;
+
+   if(v_Tex.x < sinValue + width/2 && v_Tex.x > sinValue -width/2)
+   {
+	   grey=1;
+   }
+   else
+   {
+	   grey =0;
+   }
+   FragColor = vec4(grey);
+}
 void main()
 {
-   RainDrop();
+	Flame();
 }
