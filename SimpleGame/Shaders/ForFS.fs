@@ -117,10 +117,10 @@ void Flame()
 	float speed =10;
 	float newY= 1-v_Tex.y;
 	float sinInput=newY * c_PI * 2  - u_Time*speed;
-    float sinValue = newY*amp *(((sin(sinInput) +1)/2)-0.5)+0.5;		//v_Tex.x * 는 왼쪽 고정
+    float sinValue = newY*amp *(((sin(sinInput) +1)/2)-0.5)+0.5;
 	
-	float fWidth=0.;													//끝을 뽀족하게 말고
-	float width=0.5 *mix(fWidth,1,newY);								//1-v_Tex.x 는 점점 뽀족하게
+	float fWidth=0.;
+	float width=0.5 *mix(fWidth,1,newY);
     float grey=0;
 
    if(v_Tex.x < sinValue + width/2 && v_Tex.x > sinValue -width/2)
@@ -133,7 +133,43 @@ void Flame()
    }
    FragColor = vec4(grey);
 }
+
+void TextureQ1()
+{
+	float tx = v_Tex.x;
+	float ty = 1- abs((v_Tex.y * 2)-1);													// 0~1 1~0으로 패턴 시험 문제
+
+	vec2 tex = vec2(tx,ty);
+
+	FragColor=texture(u_RGBTex,tex);
+}
+
+void TextureQ2()
+{
+	float tx = fract(v_Tex.x*3)	;
+	float ty =v_Tex.y/3;
+	
+	float offsetX = 0;
+	float offsetY = (2-floor(v_Tex.x*3))/3;												//올림, 내림으로 구간 나눔
+
+	vec2 tex = vec2(offsetX + tx,offsetY + ty);
+
+	FragColor=texture(u_RGBTex,tex);
+}
+
+void TextureQ3()
+{
+	float tx = fract(v_Tex.x*3)	;
+	float ty =v_Tex.y/3;
+	
+	float offsetX = 0;
+	float offsetY = floor(v_Tex.x*3)/3;													//
+
+	vec2 tex = vec2(offsetX + tx,offsetY + ty);
+
+	FragColor=texture(u_RGBTex,tex);
+}
 void main()
 {
-	Flame();
+	TextureQ1();
 }
