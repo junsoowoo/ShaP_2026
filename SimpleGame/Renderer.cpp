@@ -2,6 +2,8 @@
 #include "Renderer.h"
 #include <vector>
 #include "Dependencies\freeglut.h"
+#include "LoadPng.h"
+#include <assert.h>
 
 Renderer::Renderer(int windowSizeX, int windowSizeY)
 {
@@ -26,6 +28,15 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 
 	m_FSShader = CompileShaders("./Shaders/ForFS.vs", "./Shaders/ForFS.fs");
 
+	//Load textures
+	m_RgbTexture = CreatePngTexture("./Textures/rgb.png", GL_NEAREST);
+	m_NumsTexture = CreatePngTexture("./Textures/Numbers.png", GL_NEAREST);
+	
+	for (int i = 0; i < 10; i++)
+	{
+		std::string path = "./Textures/" + std::to_string(i) + ".png";
+		m_NumTexture[i] = CreatePngTexture((char*)path.c_str(), GL_NEAREST);
+	}
 	//Create VBOs
 	CreateVertexBufferObjects();
 
@@ -47,6 +58,31 @@ void Renderer::Initialize(int windowSizeX, int windowSizeY)
 		m_Initialized = true;
 	}
 
+}
+
+GLuint Renderer::CreatePngTexture(char* filePath, GLuint samplingMethod)
+{
+	//Load Png
+	std::vector<unsigned char> image;
+	unsigned width, height;
+	unsigned error = lodepng::decode(image, width, height, filePath);
+
+	if (error != 0)
+	{
+		std::cout << "PNG image loading failed:" << filePath << std::endl;
+		assert(0);
+	}
+
+	GLuint temp;
+
+	glGenTextures(1, &temp);
+	glBindTexture(GL_TEXTURE_2D, temp);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA,
+		GL_UNSIGNED_BYTE, &image[0]);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, samplingMethod);
+	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, samplingMethod);
+
+	return temp;
 }
 
 bool Renderer::IsInitialized()
@@ -261,27 +297,33 @@ void Renderer::DrawFS()
 	// 시간을 초 단위로 흐르게 설정
 	float gTime = glutGet(GLUT_ELAPSED_TIME) / 1000.0f;
 
-	//Program select
+	// Program select
 	GLuint shader = m_FSShader;
 	glUseProgram(shader);
 
 	int uTime = glGetUniformLocation(shader, "u_Time");
 	glUniform1f(uTime, gTime);
+
+	int uRGBTexture = glGetUniformLocation(shader, "u_RGBTex");
+	glUniform1i(uRGBTexture, 0);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, m_RgbTexture);
+
 	int uPoints = glGetUniformLocation(shader, "u_Points");
 	glUniform4fv(uPoints, 500, m_RainInfo);
 
-	int attribPosition = glGetAttribLocation(shader, "a_Pos");
-	int attribTex = glGetAttribLocation(shader, "a_Tex");
-
-	glEnableVertexAttribArray(attribPosition);
-	glEnableVertexAttribArray(attribTex);
+	glEnableVertexAttribArray(0); // 위치(a_Pos)
+	glEnableVertexAttribArray(1); // 텍스처 좌표(a_Tex)
 
 	glBindBuffer(GL_ARRAY_BUFFER, m_FSVBO);
 
-	glVertexAttribPointer(attribPosition, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
-	glVertexAttribPointer(attribTex, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float)*3));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, 0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (GLvoid*)(sizeof(float) * 3));
 
 	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(1);
 }
 
 void Renderer::GenParticles(int count)

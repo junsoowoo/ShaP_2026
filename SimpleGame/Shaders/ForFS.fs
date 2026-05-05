@@ -1,8 +1,10 @@
 #version 330
 
-in vec2 v_Tex;
 uniform float u_Time;
 uniform vec4 u_Points[500];
+uniform sampler2D u_RGBTex;
+
+in vec2 v_Tex;
 
 layout(location=0) out vec4 FragColor;
 
@@ -47,7 +49,7 @@ void Circle()
 		FragColor = vec4(0);
 	}
 }
-//동심원 그리기
+
 void Circles()
 {
 	vec2 center =vec2(0.5,0.5);
@@ -133,7 +135,25 @@ void Flame()
    }
    FragColor = vec4(grey);
 }
+void TextureSampling()
+{
+	vec4 c0;
+	vec4 c1;
+	vec4 c2;
+	vec4 c3;
+	vec4 c4;
 
+	float offsetX=0.01;
+	c0 = texture(u_RGBTex, vec2(v_Tex.x - offsetX*2,v_Tex.y));
+	c1 = texture(u_RGBTex, vec2(v_Tex.x - offsetX*1,v_Tex.y));
+	c2 = texture(u_RGBTex, vec2(v_Tex.x - offsetX*0,v_Tex.y));
+	c3 = texture(u_RGBTex, vec2(v_Tex.x + offsetX*1,v_Tex.y));
+	c4 = texture(u_RGBTex, vec2(v_Tex.x + offsetX*2,v_Tex.y));
+	 
+	vec4 sum=c0+c1+c2+c3+c4;
+	sum= sum/5;
+	FragColor=sum;
+}
 void TextureQ1()
 {
 	float tx = v_Tex.x;
@@ -169,7 +189,25 @@ void TextureQ3()
 
 	FragColor=texture(u_RGBTex,tex);
 }
+
+void TextureQ4()
+{
+	float resolX = 5;
+	float resolY = 3;
+	float shear =-0.5*u_Time;													//원근감
+
+	float offsetX = fract(ceil(v_Tex.y*resolY)*shear);													//offset
+	float offsetY = 0;	
+
+	float tx = fract(v_Tex.x*resolX + offsetX);									//range
+	float ty = fract(v_Tex.y*resolY + offsetY);
+
+	vec2 newTex = vec2(tx,ty);
+
+	FragColor=texture(u_RGBTex,newTex);
+}
+
 void main()
 {
-	TextureQ1();
+	TextureQ4();
 }

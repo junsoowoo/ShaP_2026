@@ -1,8 +1,8 @@
 #version 330
 
 uniform float u_Time;
-in vec3 a_Pos;
-in vec2 a_Tex;
+layout(location = 0) in vec3 a_Pos;
+layout(location = 1) in vec2 a_Tex;
 
 out vec2 v_Tex;
 
