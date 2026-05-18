@@ -3,6 +3,7 @@
 uniform float u_Time;
 uniform vec4 u_Points[500];
 uniform sampler2D u_RGBTex;
+uniform sampler2D u_CurrNumTex;
 
 in vec2 v_Tex;
 
@@ -170,7 +171,7 @@ void TextureQ2()
 	float ty =v_Tex.y/3;
 	
 	float offsetX = 0;
-	float offsetY = (2-floor(v_Tex.x*3))/3;												//올림, 내림으로 구간 나눔
+	float offsetY = (2-floor(v_Tex.x*3))/3;										//올림, 내림으로 구간 나눔
 
 	vec2 tex = vec2(offsetX + tx,offsetY + ty);
 
@@ -183,7 +184,7 @@ void TextureQ3()
 	float ty =v_Tex.y/3;
 	
 	float offsetX = 0;
-	float offsetY = floor(v_Tex.x*3)/3;													//
+	float offsetY = floor(v_Tex.x*3)/3;											//
 
 	vec2 tex = vec2(offsetX + tx,offsetY + ty);
 
@@ -196,7 +197,7 @@ void TextureQ4()
 	float resolY = 3;
 	float shear =-0.5*u_Time;													//원근감
 
-	float offsetX = fract(ceil(v_Tex.y*resolY)*shear);													//offset
+	float offsetX = fract(ceil(v_Tex.y*resolY)*shear);							//offset
 	float offsetY = 0;	
 
 	float tx = fract(v_Tex.x*resolX + offsetX);									//range
@@ -207,7 +208,20 @@ void TextureQ4()
 	FragColor=texture(u_RGBTex,newTex);
 }
 
+void Nums()
+{
+	float index =float(u_InputNum);
+
+	float tx =v_Tex.x /5;
+	float t v_Tex.y/2;
+
+	float offsetX = fract(index/5.0);
+	float offsetY = floor(index/5.0)/2;
+
+	vec2 newTex = vec2(offsetX + tx,offsetY );
+	FragColor=texture(u_RGBTex,newTex);
+}
 void main()
 {
-	TextureQ4();
+	TextureQ2();
 }

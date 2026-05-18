@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <vector>
 
 #include "Dependencies\glew.h"
 
@@ -17,37 +18,51 @@ public:
 	void DrawSolidRect(float x, float y, float z, float size, float r, float g, float b, float a);
 	void DrawTriangle();
 	void DrawFS();
+	void DrawDummy();
 
 private:
 	void Initialize(int windowSizeX, int windowSizeY);
-	GLuint CreatePngTexture(char* filePath, GLuint samplingMethod);
 	bool ReadFile(char* filename, std::string *target);
 	void AddShader(GLuint ShaderProgram, const char* pShaderText, GLenum ShaderType);
 	GLuint CompileShaders(char* filenameVS, char* filenameFS);
 	void CreateVertexBufferObjects();
 	void GetGLPosition(float x, float y, float *newX, float *newY);
 	void GenParticles(int count);
+	GLuint CreatePngTexture(char* filePath, GLuint samplingMethod);
+	void GenDummyMesh(int rx, int ry);
+	
 
 	bool m_Initialized = false;
-	int m_ParticleCount;
-
+	
 	unsigned int m_WindowSizeX = 0;
 	unsigned int m_WindowSizeY = 0;
 
 	GLuint m_VBORect = 0;
 	GLuint m_SolidRectShader = 0;
 
-	GLuint m_TriangleVBO = 0;
+	GLuint m_VBOTriangle = 0;
 	GLuint m_TriangleShader = 0;
+	
+	GLuint m_VBOParticle = 0;
+	int m_VBOParticleCount = 0;
 
-	GLuint m_FSVBO = 0;
+	//FragmentShader
+	GLuint m_VBOFS = 0;
 	GLuint m_FSShader = 0;
 
-	float m_RainInfo[500 * 4];
+	//RainDrops
+	float m_DropPoints[1000 * 4];
 
-	//Texture
+	//Textures
 	GLuint m_RgbTexture = 0;
-	GLuint m_NumTexture[10] = {0};
+	GLuint m_NumTexture[10];
 	GLuint m_NumsTexture = 0;
+	GLuint m_ParticleTexture = 0;
+	GLuint m_ParticleSpriteTexture = 0;
+
+	//Dummy Mesh
+	GLuint m_DummyVBO = 0;
+	GLuint m_DummyVBOCount = 0;
+	GLuint m_DummyShader = 0;
 };
 
